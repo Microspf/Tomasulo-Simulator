@@ -296,11 +296,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			}
 			// 流出时间
 			inst.querySelector('.issue-time').innerText = ii.issueTime > 0 ? ii.issueTime : '';
-			// 执行时段,此处“-2”是临时的，需要替换成相应指令的执行时间
+			// 执行时段
 			inst.querySelector('.exec-time').innerText = ii.executeTime > 0 ? ((1 + ii.executeTime - exec_dura) + '-' + ii.executeTime) : '';
 			// 写回时间
 			inst.querySelector('.writeback-time').innerText = ii.writeBackTime > 0 ? ii.writeBackTime : '';
 		}
+
 		for (var name in main.system.reservationStations) {
 			var station = main.system.reservationStations[name]
 			var guiItem = document.getElementById('station-' + name);
@@ -353,6 +354,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			guiItem.querySelector('.time-remaining').innerText = _remain_time >= 0 ? _remain_time : '';
 		}
 		$('#cur-pc').text(main.issuedInstructions);
+		// 内存
 		for (var i = 0; i < main.system.memory.size; i++) {
 			document.getElementById('m' + i).children[1].innerText = main.system.memory.data[i];
 		}
