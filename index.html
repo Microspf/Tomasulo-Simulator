@@ -1,25 +1,3 @@
-<!--
-Copyright (c) 2013  Brian Li <brian14708@gmail.com>, Ugeeker <xxr3376@gmail.com>
-
-Permission is hereby granted, free of charge, to any person obtaining
-a copy of this software and associated documentation files (the
-'Software'), to deal in the Software without restriction, including
-without limitation the rights to use, copy, modify, merge, publish,
-distribute, sublicense, and/or sell copies of the Software, and to
-permit persons to whom the Software is furnished to do so, subject to
-the following conditions:
-
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
--->
 <html>
 
 <head>
@@ -80,13 +58,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 					<div class="explain">保留站</div>
 					<ol id="reservation-stations" class="list">
 						<li class="station title">
-							<span class="name"> 名称</span>
-							<span class="time-remaining"> 剩余时间</span>
-							<span class="instruction-number"> 指令行号</span>
+							<span class="name"> 名称 </span>
+							<span class="time-remaining"> 剩余时间 </span>
+							<span class="instruction-name"> Op </span>
 							<span class="state"> 状态 </span>
 							<span class="p1"> 输出 </span>
-							<span class="p2"> 输入1 </span>
-							<span class="p3"> 输入2 </span>
+							<span class="p2"> Vj </span>
+							<span class="p3"> Vk </span>
 						</li>
 					</ol>
 				</div>
@@ -128,12 +106,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 <script src="js/buffer.js"></script>
 <script src="js/main.js"></script>
 <script>
+	// 初始化Tomasulo模块
 	function init(program) {
 		'use strict';
 		var System = {};
 		System.memory = new Memory(4096);
 		System.registerFile = new RegisterFile(11, 'F');
 		System.commonDataBus = new CommonDataBus();
+		// 保留站
 		System.reservationStations = {
 			ADD_1: new ReservationStation('ADD_1'),
 			ADD_2: new ReservationStation('ADD_2'),
@@ -151,6 +131,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			STORE_3: new Buffer('STORE_3', System.memory)
 
 		};
+		// 指令类型
 		System.instructionTypes = {
 			'ADD': new InstructionType('ADD', 2, 0,
 				[InstructionType.PARAMETER_TYPE_REGISTER,
@@ -186,7 +167,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 				[System.reservationStations['MUL_1'],
 				System.reservationStations['MUL_2']]),
 
-			'LD': new InstructionType('LD', 3, 0,
+			'LD': new InstructionType('LD', 2, 0,
 				[InstructionType.PARAMETER_TYPE_REGISTER,
 				InstructionType.PARAMETER_TYPE_ADDRESS],
 				function (p) { return this.memory.load(p[1]); },
@@ -206,7 +187,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 		return new Main(program, System);
 	};
 	var interval;
-	// 初始化
+	// 初始化GUI
 	function initGUI(main) {
 		$('.station:not(.title)').remove();
 		$('.instruction:not(.title)').remove();
@@ -218,7 +199,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			},
 			// 保留站
 			'newstation': function (name) {
-				return '<li class="station" id="station-' + name + '"> <span class="name">' + name + '</span> <span class="time-remaining"></span>  <span class="instruction-number"> </span> <span class="state"> </span> <span class="p1">  </span> <span class="p2"> </span> <span class="p3"></span> </li>';
+				return '<li class="station" id="station-' + name + '"> <span class="name">' + name + '</span> <span class="time-remaining"></span>  <span class="instruction-name"> </span> <span class="state"> </span> <span class="p1">  </span> <span class="p2"> </span> <span class="p3"></span> </li>';
 			},
 			// 指令
 			'newinst': function (linenum, detail) {
@@ -261,12 +242,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	// 更新
 	function update(main) {
 		document.getElementById('global-clock').innerText = main.system.clock;
+		// 更新寄存器
 		for (var i = 0; i < 11; ++i) {
 			var busy = main.system.commonDataBus.getBusy(InstructionType.PARAMETER_TYPE_REGISTER, 'F' + i);
 			var value = main.system.registerFile.get('F' + i);
-			document.getElementById('reg-F' + i).innerText = value.toFixed(5);
+			// 寄存器的值
+			document.getElementById('reg-F' + i).innerText = value.toFixed(2);
 		}
-		// 指令状态表
+		// 更新指令状态表
 		$('#total-inst').text(main.instructions.length);
 		for (var i = 0; i < main.instructions.length; ++i) {
 			var ii = main.instructions[i];
@@ -274,6 +257,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			// 获取指令的类型
 			var type = ii.type.name;
 			var exec_dura;
+			// 计算执行时间
 			switch (type) {
 				case 'ADD':
 					exec_dura = 2;
@@ -288,7 +272,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 					exec_dura = 40;
 					break;
 				case 'LD':
-					exec_dura = 3;
+					exec_dura = 2;
 					break;
 				case 'ST':
 					exec_dura = 2;
@@ -301,7 +285,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 			// 写回时间
 			inst.querySelector('.writeback-time').innerText = ii.writeBackTime > 0 ? ii.writeBackTime : '';
 		}
-
+		// 更新保留站
 		for (var name in main.system.reservationStations) {
 			var station = main.system.reservationStations[name]
 			var guiItem = document.getElementById('station-' + name);
@@ -326,17 +310,20 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 				if (station.instruction) {
 					_remain_time = station.instruction.time;
 				}
-				var _curInst = '[' + station.instruction.id + ']';
-				guiItem.querySelector('.instruction-number').innerText = _curInst;
+				// 当前指令的op
+				var _curInst = '[' + station.instruction.id + ']' + station.instruction.type.name;
+				guiItem.querySelector('.instruction-name').innerText = _curInst;
 				for (var i = 0; i < 3; i++) {
 					var td = guiItem.querySelector('.p' + (i + 1));
 					if (i >= station.parameters.length) {
 						td.innerHTML = ' - ';
 					}
 					else {
+						// tags是保留站标签
 						if (station.tags[i]) {
 							td.innerHTML = station.tags[i].name;
 						}
+						// parameters[0]/[1]/[2]分别是目标寄存器/Vj/Vk
 						else {
 							td.innerHTML = station.parameters[i];
 						}
@@ -344,7 +331,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 				}
 			}
 			else {
-				guiItem.querySelector('.instruction-number').innerText = '';
+				guiItem.querySelector('.instruction-name').innerText = '';
 				for (var i = 0; i < 3; i++) {
 					var td = guiItem.querySelector('.p' + (i + 1));
 					td.innerHTML = '';
