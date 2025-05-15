@@ -1,5 +1,5 @@
-(function() {
-	'use strict';
+(function () {
+	"use strict";
 
 	function RegisterFile(count, prefix) {
 		this.registers = new Array(count);
@@ -10,7 +10,7 @@
 		this.prefix = prefix.toUpperCase();
 	}
 
-	RegisterFile.prototype._getIndex = function(name) {
+	RegisterFile.prototype._getIndex = function (name) {
 		name = name.toUpperCase();
 		if (name.substring(0, this.prefix.length) === this.prefix) {
 			var index = parseInt(name.substring(this.prefix.length), 10);
@@ -21,20 +21,17 @@
 		throw new Error('[REGISTER_FILE] Invalid register "' + name + '"');
 	};
 
-	RegisterFile.prototype.get = function(name) {
+	RegisterFile.prototype.get = function (name) {
 		return this.registers[this._getIndex(name)];
 	};
 
-	RegisterFile.prototype.set = function(name, value) {
+	RegisterFile.prototype.set = function (name, value) {
 		this.registers[this._getIndex(name)] = value;
 	};
 
-
-	if (typeof module === 'object') {
+	if (typeof module === "object") {
 		module.exports = RegisterFile;
 	} else {
 		this.RegisterFile = RegisterFile;
 	}
-
 }).call(this);
-
