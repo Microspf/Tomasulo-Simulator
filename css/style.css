@@ -68,7 +68,7 @@ span.right i {
 }
 .list {
 	list-style: none;
-	margin: 10;
+	margin: 0;
 	padding: 0;
 }
 .list li {
@@ -110,7 +110,7 @@ span.right i {
 li.title {
 	background: #444;
 	font-weight: bold;
-	color: rgb(255, 255, 255);
+	color: white;
 }
 li:nth-child(even) {
 	background: #edf9ff;
@@ -156,13 +156,10 @@ li span {
 	text-align: right;
 	margin-right: 10px;
 }
-/* 指令队列 */
-/* 指令 */
 .instruction .instruction-detail {
 	width: 120px;
 	display: inline-block;
 }
-/* 三个阶段 */
 .instruction .issue-time,
 .instruction .exec-time,
 .instruction .writeback-time {
