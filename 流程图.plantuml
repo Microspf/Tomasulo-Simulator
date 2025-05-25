@@ -1,0 +1,61 @@
+@startuml
+start
+
+partition "指令流出阶段(ISSUE)" {
+    :取指;
+    switch (指令类型) 
+    case (LD/ST) 
+        if (对应LOAD/STORE保留站空闲?) then (是)
+            :分配LOAD/STORE保留站;
+            :读取基址寄存器;
+            :计算有效地址;
+            :地址存入保留站;
+        else (否)
+            :**结构冲突**\n暂停流水线;
+        endif
+    case (ADD/SUB/MUL/DIV)
+        if (ADD/MUL保留站≥1空闲?) then (是)
+            :分配ADD/MUL保留站;
+            if (源操作数就绪?) then (是)
+                :直接记录Vj/Vk;
+            else (否)
+                :记录Qj/Qk依赖项;
+            endif
+        else (否)
+            :**结构冲突**\n暂停流水线;
+        endif
+    endswitch
+}
+
+partition "执行阶段(EXEC)" {
+    switch (指令类型) 
+    case (LD/ST)
+        while (地址未计算完成?) is (是)
+            :等待地址计算;
+        endwhile
+        :执行访存操作(2周期);
+    case (ADD/SUB)
+        while (存在Qj/Qk依赖?) is (是)
+            :通过CDB捕获数据;
+        endwhile
+        :执行加减运算(3周期);
+    case (MUL/DIV)
+        while (存在Qj/Qk依赖?) is (是)
+            :通过CDB捕获数据;
+        endwhile
+        :执行乘除运算\nMUL(10) DIV(40);
+    endswitch
+}
+
+partition "写回阶段(WB)" {
+    :通过CDB广播结果;
+    if (指令类型=ST) then (是)
+        :将数据写入内存;
+    else (否)
+        :更新目标寄存器;
+    endif
+    :释放保留站;
+}
+
+stop
+@enduml
