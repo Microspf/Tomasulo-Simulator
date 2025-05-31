@@ -1,6 +1,7 @@
 (function() {
 	'use strict';
 
+	// 总线通过字典表示
 	function CommonDataBus() {
 		this._busy = {};
 		this._result = {};
@@ -16,7 +17,7 @@
 	};
 
 	CommonDataBus.prototype.setBusy = function(type, name, instruction) {
-		this._busy[type + '.' + name] = instruction;
+		this._busy[type + '.' + name] = instruction; // 记录当前类型的指令占用资源的情况
 	};
 
 	CommonDataBus.prototype.getResult = function(station) {

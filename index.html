@@ -373,7 +373,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 					var n = prompt("请输入运行步数");
 					$('#action-multistep').attr('disabled', 'disabled');
 					for (var i = 0; i < n; i += 1){
-						main.step();
+						main.step(); // 向下执行一步
 					}
 					update(main);
 					$('#action-multistep').attr('disabled', null);
